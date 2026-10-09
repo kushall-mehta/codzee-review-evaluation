@@ -1,11 +1,20 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 app = FastAPI(title="Task Manager API")
 
+
 class TaskCreate(BaseModel):
-    title: str
-    description: str = ""
+    title: str = Field(min_length=1, max_length=100)
+    description: str = Field(default="", max_length=500)
+
+    @field_validator("title", mode="before")
+    @classmethod
+    def validate_title(cls, value):
+        if isinstance(value, str):
+            value = value.strip()
+        return value
+
 
 class Task(TaskCreate):
     id: int
