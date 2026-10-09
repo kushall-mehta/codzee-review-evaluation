@@ -70,3 +70,43 @@ def test_update_missing_task():
     )
 
     assert response.status_code == 404
+
+
+def test_complete_task():
+    create_response = client.post(
+        "/tasks",
+        json={"title": "Complete me"},
+    )
+    task_id = create_response.json()["id"]
+
+    response = client.patch(f"/tasks/{task_id}/complete")
+
+    assert response.status_code == 200
+    assert response.json()["completed"] is True
+
+
+def test_complete_missing_task():
+    response = client.patch("/tasks/99999/complete")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Task not found"
+
+
+def test_delete_task():
+    create_response = client.post(
+        "/tasks",
+        json={"title": "Delete me"},
+    )
+    task_id = create_response.json()["id"]
+
+    response = client.delete(f"/tasks/{task_id}")
+
+    assert response.status_code == 204
+    assert client.get(f"/tasks/{task_id}").status_code == 404
+
+
+def test_delete_missing_task():
+    response = client.delete("/tasks/99999")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Task not found"
