@@ -66,3 +66,20 @@ def delete_task(task_id: int):
         raise HTTPException(status_code=404, detail="Task not found")
     del tasks[task_id]
     return None
+
+@app.put("/tasks/{task_id}", response_model=Task)
+def update_task(task_id: int, task_data: TaskCreate):
+    task = tasks.get(task_id)
+
+    if task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    updated_task = task.model_copy(
+        update={
+            "title": task_data.title,
+            "description": task_data.description,
+        }
+    )
+
+    tasks[task_id] = updated_task
+    return updated_task

@@ -44,3 +44,29 @@ def test_create_task_rejects_long_description():
         json={"title": "Valid title", "description": "a" * 501},
     )
     assert response.status_code == 422
+
+
+def test_update_task():
+    create_response = client.post(
+        "/tasks",
+        json={"title": "Old title", "description": "Old description"},
+    )
+    task_id = create_response.json()["id"]
+
+    response = client.put(
+        f"/tasks/{task_id}",
+        json={"title": "New title", "description": "New description"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["title"] == "New title"
+    assert response.json()["description"] == "New description"
+
+
+def test_update_missing_task():
+    response = client.put(
+        "/tasks/99999",
+        json={"title": "New title", "description": "New description"},
+    )
+
+    assert response.status_code == 404
